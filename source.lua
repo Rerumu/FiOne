@@ -89,19 +89,21 @@ local opcode_m = {
 	{b = 'OpArgU', c = 'OpArgN'}
 }
 
--- int rd_int_basic(int l, byte[] bb)
--- @l - Length of the byte buffer array
--- @bb - Array of bytes composing a little endian integer
-local function rd_int_basic(l, bb)
+-- int rd_int_basic(string src, int s, int e, int d)
+-- @src - Source binary string
+-- @s - Start index of a little endian integer
+-- @e - End index of the integer
+-- @d - Direction of the loop
+local function rd_int_basic(src, s, e, d)
 	local num = 0
 
 	-- if bb[l] > 127 then -- signed negative
-	-- 	num = num - 2 ^ (8 * l)
+	-- 	num = num - 256 ^ l
 	-- 	bb[l] = bb[l] - 128
 	-- end
 
-	for i = 1, l do
-		num = num + bb[i] * 256 ^ (i - 1)
+	for i = s, e, d do
+		num = num + src:byte(i, i) * 256 ^ (i - s)
 	end
 
 	return num
@@ -163,21 +165,20 @@ local function rd_dbl_basic(bb)
 	return (-1) ^ sign * 2 ^ (exp - 1023) * (normal + frac / 2 ^ 52)
 end
 
--- int rd_int_le(string s, int i, int l)
--- @s - Source binary string
--- @i - Start index of a little endian integer
--- @l - Size of integer in bytes
-local function rd_int_le(s, i, l)
-	return rd_int_basic(l, {s:byte(i, i + l - 1)})
+-- int rd_int_le(string src, int s, int e)
+-- @src - Source binary string
+-- @s - Start index of a little endian integer
+-- @e - End index of the integer
+local function rd_int_le(src, s, e)
+	return rd_int_basic(src, s, e - 1, 1)
 end
 
 -- int rd_int_be(string s, int i, int l)
 -- @s - Source binary string
 -- @i - Start index of a big endian integer
--- @l - Size of integer in bytes
-local function rd_int_be(s, i, l)
-	s = s:sub(i, i + l - 1):reverse()
-	return rd_int_basic(l, {s:byte(1, 4)})
+-- @j - End index of the integer
+local function rd_int_be(src, s, e)
+	return rd_int_basic(src, e - 1, s, -1)
 end
 
 -- float rd_flt_le(string s, int i)
@@ -261,8 +262,9 @@ end
 -- @func - Reader callback
 local function cst_int_rdr(len, func)
 	return function(S)
-		local int = func(S.source, S.index, len)
-		S.index = S.index + len
+		local pos = S.index + len
+		local int = func(S.source, S.index, pos)
+		S.index = pos
 
 		return int
 	end
