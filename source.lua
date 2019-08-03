@@ -992,7 +992,7 @@ local function exec_lua_func(exst)
 					local offset
 
 					if size == 0 then
-						size = stktop - A + 1
+						size = stktop - A
 					end
 
 					if C == 0 then
