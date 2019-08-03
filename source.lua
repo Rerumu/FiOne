@@ -1,5 +1,7 @@
 local bit = bit or bit32 or require('bit')
+local stm_lua_bytecode
 local wrap_lua_func
+local stm_lua_func
 
 -- SETLIST config
 local FIELDS_PER_FLUSH = 50
@@ -248,7 +250,7 @@ local function stm_lstring(S)
 	local str
 
 	if len ~= 0 then
-		str = S:s_string(len):sub(1, -2)
+		str = stm_string(S, len):sub(1, -2)
 	end
 
 	return str
@@ -316,15 +318,15 @@ local function stm_constants(S)
 	local consts = {}
 
 	for i = 1, size do
-		local tt = S:s_byte()
+		local tt = stm_byte(S)
 		local k
 
 		if tt == 1 then
-			k = S:s_byte() ~= 0
+			k = stm_byte(S) ~= 0
 		elseif tt == 3 then
 			k = S:s_num()
 		elseif tt == 4 then
-			k = S:s_lstring()
+			k = stm_lstring(S)
 		end
 
 		consts[i - 1] = k -- 0 based consts
@@ -338,7 +340,7 @@ local function stm_subfuncs(S, src)
 	local sub = {}
 
 	for i = 1, size do
-		sub[i - 1] = S:s_func(src) -- 0 based subfns
+		sub[i - 1] = stm_lua_func(S, src) -- 0 based subfns
 	end
 
 	return sub
@@ -361,7 +363,7 @@ local function stm_locvars(S)
 
 	for i = 1, size do
 		locvars[i] = {
-			varname = S:s_lstring(),
+			varname = stm_lstring(S),
 			startpc = S:s_int(),
 			endpc = S:s_int()
 		}
@@ -375,34 +377,34 @@ local function stm_upvals(S)
 	local upvals = {}
 
 	for i = 1, size do
-		upvals[i] = S:s_lstring()
+		upvals[i] = stm_lstring(S)
 	end
 
 	return upvals
 end
 
-local function stm_lua_func(S, psrc)
+function stm_lua_func(S, psrc)
 	local proto = {}
-	local src = S:s_lstring() or psrc -- source is propagated
+	local src = stm_lstring(S) or psrc -- source is propagated
 
 	proto.source = src -- source name
 
 	S:s_int() -- line defined
 	S:s_int() -- last line defined
 
-	proto.numupvals = S:s_byte() -- num upvalues
-	proto.numparams = S:s_byte() -- num params
+	proto.numupvals = stm_byte(S) -- num upvalues
+	proto.numparams = stm_byte(S) -- num params
 
-	S:s_byte() -- vararg flag
-	S:s_byte() -- max stack size
+	stm_byte(S) -- vararg flag
+	stm_byte(S) -- max stack size
 
-	proto.code = S:s_instructions()
-	proto.const = S:s_constants()
-	proto.subs = S:s_subfuncs(src)
-	proto.lines = S:s_lineinfo()
+	proto.code = stm_instructions(S)
+	proto.const = stm_constants(S)
+	proto.subs = stm_subfuncs(S, src)
+	proto.lines = stm_lineinfo(S)
 
-	S:s_locvars()
-	S:s_upvals()
+	stm_locvars(S)
+	stm_upvals(S)
 
 	-- post process optimization
 	for _, v in ipairs(proto.code) do
@@ -422,7 +424,7 @@ local function stm_lua_func(S, psrc)
 	return proto
 end
 
-local function stm_lua_bytecode(src)
+function stm_lua_bytecode(src)
 	-- func reader
 	local rdr_func
 
@@ -436,32 +438,21 @@ local function stm_lua_bytecode(src)
 
 	-- stream object
 	local stream = {
-		-- funcs
-		s_byte = stm_byte,
-		s_constants = stm_constants,
-		s_func = stm_lua_func,
-		s_instructions = stm_instructions,
-		s_lineinfo = stm_lineinfo,
-		s_locvars = stm_locvars,
-		s_lstring = stm_lstring,
-		s_string = stm_string,
-		s_subfuncs = stm_subfuncs,
-		s_upvals = stm_upvals,
 		-- data
 		index = 1,
 		source = src
 	}
 
-	assert(stream:s_string(4) == '\27Lua', 'invalid Lua signature')
-	assert(stream:s_byte() == 0x51, 'invalid Lua version')
-	assert(stream:s_byte() == 0, 'invalid Lua format')
+	assert(stm_string(stream, 4) == '\27Lua', 'invalid Lua signature')
+	assert(stm_byte(stream) == 0x51, 'invalid Lua version')
+	assert(stm_byte(stream) == 0, 'invalid Lua format')
 
-	little = stream:s_byte() ~= 0
-	size_int = stream:s_byte()
-	size_szt = stream:s_byte()
-	size_ins = stream:s_byte()
-	size_num = stream:s_byte()
-	flag_int = stream:s_byte() ~= 0
+	little = stm_byte(stream) ~= 0
+	size_int = stm_byte(stream)
+	size_szt = stm_byte(stream)
+	size_ins = stm_byte(stream)
+	size_num = stm_byte(stream)
+	flag_int = stm_byte(stream) ~= 0
 
 	rdr_func = little and rd_int_le or rd_int_be
 	stream.s_int = cst_int_rdr(size_int, rdr_func)
@@ -476,7 +467,7 @@ local function stm_lua_bytecode(src)
 		error('unsupported float size')
 	end
 
-	return stream:s_func()
+	return stm_lua_func(stream, '@virtual')
 end
 
 local function close_lua_upvalues(list, index)
