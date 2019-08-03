@@ -505,6 +505,11 @@ local function on_lua_error(exst, err)
 	local psrc, pline, pmsg = err:match('^(.-):(%d+):%s+(.+)')
 	local fmt = '%s:%i: [%s:%i] %s'
 
+	line = line or '0'
+	psrc = psrc or '?'
+	pline = pline or '0'
+	pmsg = pmsg or err
+
 	error(string.format(fmt, src, line, psrc, pline, pmsg), 0)
 end
 
