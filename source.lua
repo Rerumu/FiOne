@@ -109,12 +109,12 @@ local function rd_int_basic(src, s, e, d)
 	return num
 end
 
--- float rd_flt_basic(byte[] bb)
--- @bb - Array of bytes composing a little endian float
-local function rd_flt_basic(bb)
-	local sign = bit.rshift(bb[4], 7)
-	local exp = bit.rshift(bb[3], 7) + bit.lshift(bit.band(bb[4], 0x7F), 1)
-	local frac = bb[1] + bit.lshift(bb[2], 8) + bit.lshift(bit.band(bb[3], 0x7F), 16)
+-- float rd_flt_basic(byte f1..8)
+-- @f1..4 - The 4 bytes composing a little endian float
+local function rd_flt_basic(f1, f2, f3, f4)
+	local sign = bit.rshift(f4, 7)
+	local exp = bit.rshift(f3, 7) + bit.lshift(bit.band(f4, 0x7F), 1)
+	local frac = f1 + bit.lshift(f2, 8) + bit.lshift(bit.band(f3, 0x7F), 16)
 	local normal = 1
 
 	if exp == 0 then
@@ -135,17 +135,15 @@ local function rd_flt_basic(bb)
 	return (-1) ^ sign * 2 ^ (exp - 127) * (1 + normal / 2 ^ 23)
 end
 
--- double rd_dbl_basic(byte[] bb)
--- @bb - Array of bytes composing a little endian double
-local function rd_dbl_basic(bb)
-	local sign = bit.rshift(bb[8], 7)
-	local exp = bit.lshift(bit.band(bb[8], 0x7F), 4) + bit.rshift(bb[7], 4)
-	local frac = bit.band(bb[7], 0x0F) * 2 ^ (8 * 6)
+-- double rd_dbl_basic(byte f1..8)
+-- @f1..8 - The 8 bytes composing a little endian double
+local function rd_dbl_basic(f1, f2, f3, f4, f5, f6, f7, f8)
+	local sign = bit.rshift(f8, 7)
+	local exp = bit.lshift(bit.band(f8, 0x7F), 4) + bit.rshift(f7, 4)
+	local frac = bit.band(f7, 0x0F) * 2 ^ 48
 	local normal = 1
 
-	for i = 1, 6 do
-		frac = frac + bb[i] * 256 ^ (i - 1)
-	end
+	frac = frac + (f6 * 2 ^ 40) + (f5 * 2 ^ 32) + (f4 * 2 ^ 24) + (f3 * 2 ^ 16) + (f2 * 2 ^ 8) + f1 -- help
 
 	if exp == 0 then
 		if frac == 0 then
@@ -173,42 +171,42 @@ local function rd_int_le(src, s, e)
 	return rd_int_basic(src, s, e - 1, 1)
 end
 
--- int rd_int_be(string s, int i, int l)
--- @s - Source binary string
--- @i - Start index of a big endian integer
--- @j - End index of the integer
+-- int rd_int_be(string src, int s, int e)
+-- @src - Source binary string
+-- @s - Start index of a big endian integer
+-- @e - End index of the integer
 local function rd_int_be(src, s, e)
 	return rd_int_basic(src, e - 1, s, -1)
 end
 
--- float rd_flt_le(string s, int i)
--- @s - Source binary string
--- @i - Start index of little endian float
-local function rd_flt_le(s, i)
-	return rd_flt_basic {s:byte(i, i + 3)}
+-- float rd_flt_le(string src, int s)
+-- @src - Source binary string
+-- @s - Start index of little endian float
+local function rd_flt_le(src, s)
+	return rd_flt_basic(src:byte(s, s + 3))
 end
 
--- float rd_flt_be(string s, int i)
--- @s - Source binary string
--- @i - Start index of big endian float
-local function rd_flt_be(s, i)
-	s = s:sub(i, i + 3):reverse()
-	return rd_flt_basic {s:byte(1, 4)}
+-- float rd_flt_be(string src, int s)
+-- @src - Source binary string
+-- @s - Start index of big endian float
+local function rd_flt_be(src, s)
+	local f1, f2, f3, f4 = src:byte(s, s + 3)
+	return rd_flt_basic(f4, f3, f2, f1)
 end
 
--- double rd_dbl_le(string s, int i)
--- @s - Source binary string
--- @i - Start index of little endian double
-local function rd_dbl_le(s, i)
-	return rd_dbl_basic {s:byte(i, i + 7)}
+-- double rd_dbl_le(string src, int s)
+-- @src - Source binary string
+-- @s - Start index of little endian double
+local function rd_dbl_le(src, s)
+	return rd_dbl_basic(src:byte(s, s + 7))
 end
 
--- double rd_dbl_be(string s, int i)
--- @s - Source binary string
--- @i - Start index of big endian double
-local function rd_dbl_be(s, i)
-	s = s:sub(i, i + 7):reverse()
-	return rd_dbl_basic {s:byte(1, 8)}
+-- double rd_dbl_be(string src, int s)
+-- @src - Source binary string
+-- @s - Start index of big endian double
+local function rd_dbl_be(src, s)
+	local f1, f2, f3, f4, f5, f6, f7, f8 = src:byte(s, s + 7) -- same
+	return rd_dbl_basic(f8, f7, f6, f5, f4, f3, f2, f1)
 end
 
 -- to avoid nested ifs in deserializing
