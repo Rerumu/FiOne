@@ -329,7 +329,7 @@ local function stm_constants(S)
 			k = stm_lstring(S)
 		end
 
-		consts[i - 1] = k -- 0 based consts
+		consts[i] = k -- offset +1 during instruction decode
 	end
 
 	return consts
@@ -340,7 +340,7 @@ local function stm_subfuncs(S, src)
 	local sub = {}
 
 	for i = 1, size do
-		sub[i - 1] = stm_lua_func(S, src) -- 0 based subfns
+		sub[i] = stm_lua_func(S, src) -- offset +1 in CLOSURE
 	end
 
 	return sub
@@ -409,14 +409,14 @@ function stm_lua_func(S, psrc)
 	-- post process optimization
 	for _, v in ipairs(proto.code) do
 		if v.is_K then
-			v.const = proto.const[v.Bx]
+			v.const = proto.const[v.Bx + 1] -- offset for 1 based index
 		else
 			if v.is_KB then
-				v.const_B = proto.const[v.B - 0x100]
+				v.const_B = proto.const[v.B - 0xFF]
 			end
 
 			if v.is_KC then
-				v.const_C = proto.const[v.C - 0x100]
+				v.const_C = proto.const[v.C - 0xFF]
 			end
 		end
 	end
@@ -961,7 +961,7 @@ local function exec_lua_func(exst)
 						end
 					else
 						--[[36 CLOSURE]]
-						local sub = subs[inst.Bx]
+						local sub = subs[inst.Bx + 1] -- offset for 1 based index
 						local nups = sub.numupvals
 						local uvlist
 
