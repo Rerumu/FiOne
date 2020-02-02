@@ -45,7 +45,7 @@ local opcode_t = {
 	'ABC',
 	'ABC',
 	'ABx',
-	'ABC'
+	'ABC',
 }
 
 local opcode_m = {
@@ -86,7 +86,7 @@ local opcode_m = {
 	{b = 'OpArgU', c = 'OpArgU'},
 	{b = 'OpArgN', c = 'OpArgN'},
 	{b = 'OpArgU', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgN'}
+	{b = 'OpArgU', c = 'OpArgN'},
 }
 
 -- int rd_int_basic(string src, int s, int e, int d)
@@ -102,9 +102,7 @@ local function rd_int_basic(src, s, e, d)
 	-- 	bb[l] = bb[l] - 128
 	-- end
 
-	for i = s, e, d do
-		num = num + src:byte(i, i) * 256 ^ (i - s)
-	end
+	for i = s, e, d do num = num + src:byte(i, i) * 256 ^ (i - s) end
 
 	return num
 end
@@ -167,24 +165,18 @@ end
 -- @src - Source binary string
 -- @s - Start index of a little endian integer
 -- @e - End index of the integer
-local function rd_int_le(src, s, e)
-	return rd_int_basic(src, s, e - 1, 1)
-end
+local function rd_int_le(src, s, e) return rd_int_basic(src, s, e - 1, 1) end
 
 -- int rd_int_be(string src, int s, int e)
 -- @src - Source binary string
 -- @s - Start index of a big endian integer
 -- @e - End index of the integer
-local function rd_int_be(src, s, e)
-	return rd_int_basic(src, e - 1, s, -1)
-end
+local function rd_int_be(src, s, e) return rd_int_basic(src, e - 1, s, -1) end
 
 -- float rd_flt_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian float
-local function rd_flt_le(src, s)
-	return rd_flt_basic(src:byte(s, s + 3))
-end
+local function rd_flt_le(src, s) return rd_flt_basic(src:byte(s, s + 3)) end
 
 -- float rd_flt_be(string src, int s)
 -- @src - Source binary string
@@ -197,9 +189,7 @@ end
 -- double rd_dbl_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian double
-local function rd_dbl_le(src, s)
-	return rd_dbl_basic(src:byte(s, s + 7))
-end
+local function rd_dbl_le(src, s) return rd_dbl_basic(src:byte(s, s + 7)) end
 
 -- double rd_dbl_be(string src, int s)
 -- @src - Source binary string
@@ -211,14 +201,8 @@ end
 
 -- to avoid nested ifs in deserializing
 local float_types = {
-	[4] = {
-		little = rd_flt_le,
-		big = rd_flt_be
-	},
-	[8] = {
-		little = rd_dbl_le,
-		big = rd_dbl_be
-	}
+	[4] = {little = rd_flt_le, big = rd_flt_be},
+	[8] = {little = rd_dbl_le, big = rd_dbl_be},
 }
 
 -- byte stm_byte(Stream S)
@@ -248,9 +232,7 @@ local function stm_lstring(S)
 	local len = S:s_szt()
 	local str
 
-	if len ~= 0 then
-		str = stm_string(S, len):sub(1, -2)
-	end
+	if len ~= 0 then str = stm_string(S, len):sub(1, -2) end
 
 	return str
 end
@@ -289,11 +271,7 @@ local function stm_instructions(S)
 		local op = bit.band(ins, 0x3F)
 		local args = opcode_t[op]
 		local mode = opcode_m[op]
-		local data = {
-			value = ins,
-			op = op,
-			A = bit.band(bit.rshift(ins, 6), 0xFF)
-		}
+		local data = {value = ins, op = op, A = bit.band(bit.rshift(ins, 6), 0xFF)}
 
 		if args == 'ABC' then
 			data.B = bit.band(bit.rshift(ins, 23), 0x1FF)
@@ -350,9 +328,7 @@ local function stm_lineinfo(S)
 	local size = S:s_int()
 	local lines = {}
 
-	for i = 1, size do
-		lines[i] = S:s_int()
-	end
+	for i = 1, size do lines[i] = S:s_int() end
 
 	return lines
 end
@@ -361,13 +337,7 @@ local function stm_locvars(S)
 	local size = S:s_int()
 	local locvars = {}
 
-	for i = 1, size do
-		locvars[i] = {
-			varname = stm_lstring(S),
-			startpc = S:s_int(),
-			endpc = S:s_int()
-		}
-	end
+	for i = 1, size do locvars[i] = {varname = stm_lstring(S), startpc = S:s_int(), endpc = S:s_int()} end
 
 	return locvars
 end
@@ -376,9 +346,7 @@ local function stm_upvals(S)
 	local size = S:s_int()
 	local upvals = {}
 
-	for i = 1, size do
-		upvals[i] = stm_lstring(S)
-	end
+	for i = 1, size do upvals[i] = stm_lstring(S) end
 
 	return upvals
 end
@@ -411,13 +379,9 @@ function stm_lua_func(S, psrc)
 		if v.is_K then
 			v.const = proto.const[v.Bx + 1] -- offset for 1 based index
 		else
-			if v.is_KB then
-				v.const_B = proto.const[v.B - 0xFF]
-			end
+			if v.is_KB then v.const_B = proto.const[v.B - 0xFF] end
 
-			if v.is_KC then
-				v.const_C = proto.const[v.C - 0xFF]
-			end
+			if v.is_KC then v.const_C = proto.const[v.C - 0xFF] end
 		end
 	end
 
@@ -440,7 +404,7 @@ function stm_lua_bytecode(src)
 	local stream = {
 		-- data
 		index = 1,
-		source = src
+		source = src,
 	}
 
 	assert(stm_string(stream, 4) == '\27Lua', 'invalid Lua signature')
@@ -485,19 +449,14 @@ local function open_lua_upvalue(list, index, stack)
 	local prev = list[index]
 
 	if not prev then
-		prev = {
-			index = index,
-			store = stack
-		}
+		prev = {index = index, store = stack}
 		list[index] = prev
 	end
 
 	return prev
 end
 
-local function wrap_lua_variadic(...)
-	return select('#', ...), {...}
-end
+local function wrap_lua_variadic(...) return select('#', ...), {...} end
 
 local function on_lua_error(exst, err)
 	local src = exst.source
@@ -545,16 +504,12 @@ local function exec_lua_func(exst)
 						end
 					elseif op > 2 then
 						--[[3 LOADNIL]]
-						for i = inst.A, inst.B do
-							stack[i] = nil
-						end
+						for i = inst.A, inst.B do stack[i] = nil end
 					else
 						--[[2 LOADBOOL]]
 						stack[inst.A] = inst.B ~= 0
 
-						if inst.C ~= 0 then
-							pc = pc + 1
-						end
+						if inst.C ~= 0 then pc = pc + 1 end
 					end
 				elseif op > 4 then
 					if op < 7 then
@@ -749,9 +704,7 @@ local function exec_lua_func(exst)
 							--[[21 CONCAT]]
 							local str = stack[inst.B]
 
-							for i = inst.B + 1, inst.C do
-								str = str .. stack[i]
-							end
+							for i = inst.B + 1, inst.C do str = str .. stack[i] end
 
 							stack[inst.A] = str
 						end
@@ -771,9 +724,7 @@ local function exec_lua_func(exst)
 							rhs = stack[inst.C]
 						end
 
-						if (lhs == rhs) ~= (inst.A ~= 0) then
-							pc = pc + 1
-						end
+						if (lhs == rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 					else
 						--[[22 JMP]]
 						pc = pc + inst.sBx
@@ -796,14 +747,10 @@ local function exec_lua_func(exst)
 								rhs = stack[inst.C]
 							end
 
-							if (lhs <= rhs) ~= (inst.A ~= 0) then
-								pc = pc + 1
-							end
+							if (lhs <= rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 						else
 							--[[26 TEST]]
-							if (not stack[inst.A]) == (inst.C ~= 0) then
-								pc = pc + 1
-							end
+							if (not stack[inst.A]) == (inst.C ~= 0) then pc = pc + 1 end
 						end
 					elseif op > 27 then
 						--[[28 CALL]]
@@ -827,9 +774,7 @@ local function exec_lua_func(exst)
 							sz_vals = C - 1
 						end
 
-						for i = 1, sz_vals do
-							stack[A + i - 1] = l_vals[i]
-						end
+						for i = 1, sz_vals do stack[A + i - 1] = l_vals[i] end
 					else
 						--[[27 TESTSET]]
 						local A = inst.A
@@ -857,9 +802,7 @@ local function exec_lua_func(exst)
 						rhs = stack[inst.C]
 					end
 
-					if (lhs < rhs) ~= (inst.A ~= 0) then
-						pc = pc + 1
-					end
+					if (lhs < rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 				end
 			elseif op > 29 then
 				if op < 34 then
@@ -877,9 +820,7 @@ local function exec_lua_func(exst)
 								size = B - 1
 							end
 
-							for i = 1, size do
-								vals[i] = stack[A + i - 1]
-							end
+							for i = 1, size do vals[i] = stack[A + i - 1] end
 
 							close_lua_upvalues(openupvs, math.huge)
 							return size, vals
@@ -918,9 +859,7 @@ local function exec_lua_func(exst)
 
 						vals = {func(state, index)}
 
-						for i = 1, inst.C do
-							stack[base + i - 1] = vals[i]
-						end
+						for i = 1, inst.C do stack[base + i - 1] = vals[i] end
 
 						if stack[base] ~= nil then
 							stack[A + 2] = stack[base]
@@ -956,9 +895,7 @@ local function exec_lua_func(exst)
 							stktop = A + size - 1
 						end
 
-						for i = 1, size do
-							stack[A + i - 1] = vargs.list[i]
-						end
+						for i = 1, size do stack[A + i - 1] = vargs.list[i] end
 					else
 						--[[36 CLOSURE]]
 						local sub = subs[inst.Bx + 1] -- offset for 1 based index
@@ -991,9 +928,7 @@ local function exec_lua_func(exst)
 					local tab = stack[A]
 					local offset
 
-					if size == 0 then
-						size = stktop - A
-					end
+					if size == 0 then size = stktop - A end
 
 					if C == 0 then
 						C = inst[pc].value
@@ -1002,9 +937,7 @@ local function exec_lua_func(exst)
 
 					offset = (C - 1) * FIELDS_PER_FLUSH
 
-					for i = 1, size do
-						tab[i + offset] = stack[A + i]
-					end
+					for i = 1, size do tab[i + offset] = stack[A + i] end
 				end
 			else
 				--[[29 TAILCALL]]
@@ -1046,22 +979,15 @@ function wrap_lua_func(state, env, upvals)
 		local exst
 		local ok, err, vals
 
-		for i = 1, st_numparams do
-			stack[i - 1] = l_args[i]
-		end
+		for i = 1, st_numparams do stack[i - 1] = l_args[i] end
 
 		if st_numparams < sz_args then
 			sizevarg = sz_args - st_numparams
-			for i = 1, sizevarg do
-				varargs[i] = l_args[st_numparams + i]
-			end
+			for i = 1, sizevarg do varargs[i] = l_args[st_numparams + i] end
 		end
 
 		exst = {
-			varargs = {
-				list = varargs,
-				size = sizevarg
-			},
+			varargs = {list = varargs, size = sizevarg},
 			code = st_code,
 			subs = st_subs,
 			lines = st_lines,
@@ -1069,7 +995,7 @@ function wrap_lua_func(state, env, upvals)
 			env = env,
 			upvals = upvals,
 			stack = stack,
-			pc = 1
+			pc = 1,
 		}
 
 		ok, err, vals = pcall(exec_lua_func, exst, ...)
@@ -1086,7 +1012,4 @@ function wrap_lua_func(state, env, upvals)
 	return exec_wrap
 end
 
-return {
-	stm_lua = stm_lua_bytecode,
-	wrap_lua = wrap_lua_func
-}
+return {stm_lua = stm_lua_bytecode, wrap_lua = wrap_lua_func}

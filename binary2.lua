@@ -21,9 +21,7 @@ local function search(i, mn, mx)
 	return low .. high .. '--[[' .. i .. ']]' .. pad
 end
 
-local function ps_search(n)
-	return search(n / 2, -1, n + 1)
-end
+local function ps_search(n) return search(n / 2, -1, n + 1) end
 
 -- helper to generate the binary search for instructions
 local fp = io.open('opcodes.lua', 'wb')
