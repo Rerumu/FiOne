@@ -822,7 +822,7 @@ local function exec_lua_func(exst)
 
 							for i = 1, size do vals[i] = stack[A + i - 1] end
 
-							close_lua_upvalues(openupvs, math.huge)
+							close_lua_upvalues(openupvs, 0)
 							return size, vals
 						else
 							--[[31 FORLOOP]]
@@ -951,7 +951,7 @@ local function exec_lua_func(exst)
 					params = B - 1
 				end
 
-				close_lua_upvalues(openupvs, math.huge)
+				close_lua_upvalues(openupvs, 0)
 				return wrap_lua_variadic(stack[A](unpack(stack, A + 1, A + params)))
 			end
 		else
