@@ -1,4 +1,6 @@
 local bit = bit or bit32 or require('bit')
+local unpack = table.unpack or unpack
+
 local stm_lua_bytecode
 local wrap_lua_func
 local stm_lua_func
