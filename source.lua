@@ -110,7 +110,7 @@ end
 -- float rd_flt_basic(byte f1..8)
 -- @f1..4 - The 4 bytes composing a little endian float
 local function rd_flt_basic(f1, f2, f3, f4)
-	local sign = bit.rshift(f4, 7)
+	local sign = (-1) ^ bit.rshift(f4, 7)
 	local exp = bit.rshift(f3, 7) + bit.lshift(bit.band(f4, 0x7F), 1)
 	local frac = f1 + bit.lshift(f2, 8) + bit.lshift(bit.band(f3, 0x7F), 16)
 	local normal = 1
@@ -130,13 +130,13 @@ local function rd_flt_basic(f1, f2, f3, f4)
 		end
 	end
 
-	return (-1) ^ sign * 2 ^ (exp - 127) * (1 + normal / 2 ^ 23)
+	return sign * 2 ^ (exp - 127) * (1 + normal / 2 ^ 23)
 end
 
 -- double rd_dbl_basic(byte f1..8)
 -- @f1..8 - The 8 bytes composing a little endian double
 local function rd_dbl_basic(f1, f2, f3, f4, f5, f6, f7, f8)
-	local sign = bit.rshift(f8, 7)
+	local sign = (-1) ^ bit.rshift(f8, 7)
 	local exp = bit.lshift(bit.band(f8, 0x7F), 4) + bit.rshift(f7, 4)
 	local frac = bit.band(f7, 0x0F) * 2 ^ 48
 	local normal = 1
@@ -158,7 +158,7 @@ local function rd_dbl_basic(f1, f2, f3, f4, f5, f6, f7, f8)
 		end
 	end
 
-	return (-1) ^ sign * 2 ^ (exp - 1023) * (normal + frac / 2 ^ 52)
+	return sign * 2 ^ (exp - 1023) * (normal + frac / 2 ^ 52)
 end
 
 -- int rd_int_le(string src, int s, int e)
