@@ -104,7 +104,7 @@ local function rd_int_basic(src, s, e, d)
 	-- 	bb[l] = bb[l] - 128
 	-- end
 
-	for i = s, e, d do num = num + src:byte(i, i) * 256 ^ (i - s) end
+	for i = s, e, d do num = num + string.byte(src, i, i) * 256 ^ (i - s) end
 
 	return num
 end
@@ -178,26 +178,26 @@ local function rd_int_be(src, s, e) return rd_int_basic(src, e - 1, s, -1) end
 -- float rd_flt_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian float
-local function rd_flt_le(src, s) return rd_flt_basic(src:byte(s, s + 3)) end
+local function rd_flt_le(src, s) return rd_flt_basic(string.byte(src, s, s + 3)) end
 
 -- float rd_flt_be(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of big endian float
 local function rd_flt_be(src, s)
-	local f1, f2, f3, f4 = src:byte(s, s + 3)
+	local f1, f2, f3, f4 = string.byte(src, s, s + 3)
 	return rd_flt_basic(f4, f3, f2, f1)
 end
 
 -- double rd_dbl_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian double
-local function rd_dbl_le(src, s) return rd_dbl_basic(src:byte(s, s + 7)) end
+local function rd_dbl_le(src, s) return rd_dbl_basic(string.byte(src, s, s + 7)) end
 
 -- double rd_dbl_be(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of big endian double
 local function rd_dbl_be(src, s)
-	local f1, f2, f3, f4, f5, f6, f7, f8 = src:byte(s, s + 7) -- same
+	local f1, f2, f3, f4, f5, f6, f7, f8 = string.byte(src, s, s + 7) -- same
 	return rd_dbl_basic(f8, f7, f6, f5, f4, f3, f2, f1)
 end
 
@@ -211,7 +211,7 @@ local float_types = {
 -- @S - Stream object to read from
 local function stm_byte(S)
 	local idx = S.index
-	local bt = S.source:byte(idx, idx)
+	local bt = string.byte(S.source, idx, idx)
 
 	S.index = idx + 1
 	return bt
@@ -222,7 +222,7 @@ end
 -- @len - Length of string being read
 local function stm_string(S, len)
 	local pos = S.index + len
-	local str = S.source:sub(S.index, pos - 1)
+	local str = string.sub(S.source, S.index, pos - 1)
 
 	S.index = pos
 	return str
@@ -234,7 +234,7 @@ local function stm_lstring(S)
 	local len = S:s_szt()
 	local str
 
-	if len ~= 0 then str = stm_string(S, len):sub(1, -2) end
+	if len ~= 0 then str = string.sub(stm_string(S, len), 1, -2) end
 
 	return str
 end
@@ -463,7 +463,7 @@ local function wrap_lua_variadic(...) return select('#', ...), {...} end
 local function on_lua_error(exst, err)
 	local src = exst.source
 	local line = exst.lines[exst.pc - 1]
-	local psrc, pline, pmsg = err:match('^(.-):(%d+):%s+(.+)')
+	local psrc, pline, pmsg = string.match(err, '^(.-):(%d+):%s+(.+)')
 	local fmt = '%s:%i: [%s:%i] %s'
 
 	line = line or '0'
