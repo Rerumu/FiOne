@@ -398,9 +398,9 @@ if nups ~= 0 then
 	for i = 1, nups do
 		local pseudo = code[pc + i - 1]
 
-		if pseudo.op == 0 then -- @MOVE
+		if pseudo.op == OPCODE_RM[0] then -- @MOVE
 			uvlist[i - 1] = open_lua_upvalue(openupvs, pseudo.B, stack)
-		elseif pseudo.op == 4 then -- @GETUPVAL
+		elseif pseudo.op == OPCODE_RM[4] then -- @GETUPVAL
 			uvlist[i - 1] = upvs[pseudo.B]
 		end
 	end
