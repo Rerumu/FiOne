@@ -1,8 +1,6 @@
 local env = getfenv(0)
 local fio
 
--- env.bit = require('bit').bit32 -- local testing
-
 local function wrap_func(fn) return fio.wrap_lua(fio.stm_lua(string.dump(fn)), env) end
 
 fio = require('source')
