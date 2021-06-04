@@ -47,7 +47,7 @@ local OPCODE_RM = {
 }
 
 do
-	local fp = io.open('preset.lua')
+	local fp = io.open('gen_template.lua')
 	local preset = fp:read('a')
 
 	fp:close()
@@ -100,7 +100,7 @@ local function gen_search(min, max)
 	return table.concat(buf)
 end
 
-local fp = io.open('opcodes.lua', 'wb')
+local fp = io.open('bin_tree.lua')
 
 fp:write(gen_search(0, 37))
 fp:close()
