@@ -824,7 +824,9 @@ local function exec_lua_func(exst)
 								rhs = stack[inst.C]
 							end
 
-							if (lhs == rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+							if (lhs == rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+							pc = pc + 1
 						end
 					elseif op > 26 then
 						--[[LT]]
@@ -842,7 +844,9 @@ local function exec_lua_func(exst)
 							rhs = stack[inst.C]
 						end
 
-						if (lhs < rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+						if (lhs < rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+						pc = pc + 1
 					else
 						--[[POW]]
 						local lhs, rhs
@@ -885,7 +889,9 @@ local function exec_lua_func(exst)
 							rhs = stack[inst.C]
 						end
 
-						if (lhs <= rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+						if (lhs <= rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+						pc = pc + 1
 					elseif op > 30 then
 						if op < 32 then
 							--[[CLOSURE]]

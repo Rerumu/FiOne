@@ -208,7 +208,9 @@ else
 	rhs = stack[inst.C]
 end
 
-if (lhs == rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+if (lhs == rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+pc = pc + 1
 
 --[[LT]]
 local lhs, rhs
@@ -225,7 +227,9 @@ else
 	rhs = stack[inst.C]
 end
 
-if (lhs < rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+if (lhs < rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+pc = pc + 1
 
 --[[LE]]
 local lhs, rhs
@@ -242,7 +246,9 @@ else
 	rhs = stack[inst.C]
 end
 
-if (lhs <= rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
+if (lhs <= rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+
+pc = pc + 1
 
 --[[TEST]]
 if (not stack[inst.A]) == (inst.C ~= 0) then pc = pc + 1 end
