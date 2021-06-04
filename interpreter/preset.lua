@@ -1,25 +1,25 @@
---[[0 MOVE]] stack[inst.A] = stack[inst.B]
+--[[MOVE]] stack[inst.A] = stack[inst.B]
 
---[[1 LOADK]]
+--[[LOADK]]
 stack[inst.A] = inst.const
 
---[[2 LOADBOOL]]
+--[[LOADBOOL]]
 stack[inst.A] = inst.B ~= 0
 
 if inst.C ~= 0 then pc = pc + 1 end
 
---[[3 LOADNIL]]
+--[[LOADNIL]]
 for i = inst.A, inst.B do stack[i] = nil end
 
---[[4 GETUPVAL]]
+--[[GETUPVAL]]
 local uv = upvs[inst.B]
 
 stack[inst.A] = uv.store[uv.index]
 
---[[5 GETGLOBAL]]
+--[[GETGLOBAL]]
 stack[inst.A] = env[inst.const]
 
---[[6 GETTABLE]]
+--[[GETTABLE]]
 local index
 
 if inst.is_KC then
@@ -30,15 +30,15 @@ end
 
 stack[inst.A] = stack[inst.B][index]
 
---[[7 SETGLOBAL]]
+--[[SETGLOBAL]]
 env[inst.const] = stack[inst.A]
 
---[[8 SETUPVAL]]
+--[[SETUPVAL]]
 local uv = upvs[inst.B]
 
 uv.store[uv.index] = stack[inst.A]
 
---[[9 SETTABLE]]
+--[[SETTABLE]]
 local index, value
 
 if inst.is_KB then
@@ -55,10 +55,10 @@ end
 
 stack[inst.A][index] = value
 
---[[10 NEWTABLE]]
+--[[NEWTABLE]]
 stack[inst.A] = {}
 
---[[11 SELF]]
+--[[SELF]]
 local A = inst.A
 local B = inst.B
 local index
@@ -72,7 +72,7 @@ end
 stack[A + 1] = stack[B]
 stack[A] = stack[B][index]
 
---[[12 ADD]]
+--[[ADD]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -89,7 +89,7 @@ end
 
 stack[inst.A] = lhs + rhs
 
---[[13 SUB]]
+--[[SUB]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -106,7 +106,7 @@ end
 
 stack[inst.A] = lhs - rhs
 
---[[14 MUL]]
+--[[MUL]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -123,7 +123,7 @@ end
 
 stack[inst.A] = lhs * rhs
 
---[[15 DIV]]
+--[[DIV]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -140,7 +140,7 @@ end
 
 stack[inst.A] = lhs / rhs
 
---[[16 MOD]]
+--[[MOD]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -157,7 +157,7 @@ end
 
 stack[inst.A] = lhs % rhs
 
---[[17 POW]]
+--[[POW]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -174,26 +174,26 @@ end
 
 stack[inst.A] = lhs ^ rhs
 
---[[18 UNM]]
+--[[UNM]]
 stack[inst.A] = -stack[inst.B]
 
---[[19 NOT]]
+--[[NOT]]
 stack[inst.A] = not stack[inst.B]
 
---[[20 LEN]]
+--[[LEN]]
 stack[inst.A] = #stack[inst.B]
 
---[[21 CONCAT]]
+--[[CONCAT]]
 local str = stack[inst.B]
 
 for i = inst.B + 1, inst.C do str = str .. stack[i] end
 
 stack[inst.A] = str
 
---[[22 JMP]]
+--[[JMP]]
 pc = pc + inst.sBx
 
---[[23 EQ]]
+--[[EQ]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -210,7 +210,7 @@ end
 
 if (lhs == rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 
---[[24 LT]]
+--[[LT]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -227,7 +227,7 @@ end
 
 if (lhs < rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 
---[[25 LE]]
+--[[LE]]
 local lhs, rhs
 
 if inst.is_KB then
@@ -244,10 +244,10 @@ end
 
 if (lhs <= rhs) ~= (inst.A ~= 0) then pc = pc + 1 end
 
---[[26 TEST]]
+--[[TEST]]
 if (not stack[inst.A]) == (inst.C ~= 0) then pc = pc + 1 end
 
---[[27 TESTSET]]
+--[[TESTSET]]
 local A = inst.A
 local B = inst.B
 
@@ -257,7 +257,7 @@ else
 	stack[A] = stack[B]
 end
 
---[[28 CALL]]
+--[[CALL]]
 local A = inst.A
 local B = inst.B
 local C = inst.C
@@ -280,7 +280,7 @@ end
 
 for i = 1, sz_vals do stack[A + i - 1] = l_vals[i] end
 
---[[29 TAILCALL]]
+--[[TAILCALL]]
 local A = inst.A
 local B = inst.B
 local params
@@ -294,7 +294,7 @@ end
 close_lua_upvalues(openupvs, 0)
 return wrap_lua_variadic(stack[A](unpack(stack, A + 1, A + params)))
 
---[[30 RETURN]]
+--[[RETURN]]
 local A = inst.A
 local B = inst.B
 local vals = {}
@@ -311,7 +311,7 @@ for i = 1, size do vals[i] = stack[A + i - 1] end
 close_lua_upvalues(openupvs, 0)
 return size, vals
 
---[[31 FORLOOP]]
+--[[FORLOOP]]
 local A = inst.A
 local step = stack[A + 2]
 local index = stack[A] + step
@@ -330,7 +330,7 @@ if loops then
 	pc = pc + inst.sBx
 end
 
---[[32 FORPREP]]
+--[[FORPREP]]
 local A = inst.A
 local init, limit, step
 
@@ -344,7 +344,7 @@ stack[A + 2] = step
 
 pc = pc + inst.sBx
 
---[[33 TFORLOOP]]
+--[[TFORLOOP]]
 local A = inst.A
 local func = stack[A]
 local state = stack[A + 1]
@@ -366,7 +366,7 @@ else
 	pc = pc + 1
 end
 
---[[34 SETLIST]]
+--[[SETLIST]]
 local A = inst.A
 local C = inst.C
 local size = inst.B
@@ -384,10 +384,10 @@ offset = (C - 1) * FIELDS_PER_FLUSH
 
 for i = 1, size do tab[i + offset] = stack[A + i] end
 
---[[35 CLOSE]]
+--[[CLOSE]]
 close_lua_upvalues(openupvs, inst.A)
 
---[[36 CLOSURE]]
+--[[CLOSURE]]
 local sub = subs[inst.Bx + 1] -- offset for 1 based index
 local nups = sub.numupvals
 local uvlist
@@ -410,7 +410,7 @@ end
 
 stack[inst.A] = wrap_lua_func(sub, env, uvlist)
 
---[[37 VARARG]]
+--[[VARARG]]
 local A = inst.A
 local size = inst.B
 
