@@ -9,7 +9,7 @@ local stm_lua_func
 local FIELDS_PER_FLUSH = 50
 
 -- remap for better lookup
-local opcode_rm = {
+local OPCODE_RM = {
 	-- level 1
 	[22] = 18, -- JMP
 	[31] = 8, -- FORLOOP
@@ -56,7 +56,7 @@ local opcode_rm = {
 }
 
 -- opcode types for getting values
-local opcode_t = {
+local OPCODE_T = {
 	[0] = 'ABC',
 	'ABx',
 	'ABC',
@@ -97,7 +97,7 @@ local opcode_t = {
 	'ABC',
 }
 
-local opcode_m = {
+local OPCODE_M = {
 	[0] = {b = 'OpArgR', c = 'OpArgN'},
 	{b = 'OpArgK', c = 'OpArgN'},
 	{b = 'OpArgU', c = 'OpArgU'},
@@ -318,9 +318,9 @@ local function stm_instructions(S)
 	for i = 1, size do
 		local ins = S:s_ins()
 		local op = bit.band(ins, 0x3F)
-		local args = opcode_t[op]
-		local mode = opcode_m[op]
-		local data = {value = ins, op = opcode_rm[op], A = bit.band(bit.rshift(ins, 6), 0xFF)}
+		local args = OPCODE_T[op]
+		local mode = OPCODE_M[op]
+		local data = {value = ins, op = OPCODE_RM[op], A = bit.band(bit.rshift(ins, 6), 0xFF)}
 
 		if args == 'ABC' then
 			data.B = bit.band(bit.rshift(ins, 23), 0x1FF)
@@ -899,9 +899,9 @@ local function exec_lua_func(exst)
 								for i = 1, nups do
 									local pseudo = code[pc + i - 1]
 
-									if pseudo.op == opcode_rm[0] then -- @MOVE
+									if pseudo.op == OPCODE_RM[0] then -- @MOVE
 										uvlist[i - 1] = open_lua_upvalue(openupvs, pseudo.B, stack)
-									elseif pseudo.op == opcode_rm[4] then -- @GETUPVAL
+									elseif pseudo.op == OPCODE_RM[4] then -- @GETUPVAL
 										uvlist[i - 1] = upvs[pseudo.B]
 									end
 								end

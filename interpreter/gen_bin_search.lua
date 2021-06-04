@@ -1,5 +1,6 @@
 local opcode_map = {}
-local opcode_rm = {
+
+local OPCODE_RM = {
 	-- level 1
 	[18] = 22, -- JMP
 	[8] = 31, -- FORLOOP
@@ -85,7 +86,7 @@ local function gen_search_inner(buf, i, min, max)
 		table.insert(buf, 'else')
 	end
 
-	table.insert(buf, opcode_map[opcode_rm[i]])
+	table.insert(buf, opcode_map[OPCODE_RM[i]])
 
 	if len ~= #buf then table.insert(buf, ' end ') end
 end
