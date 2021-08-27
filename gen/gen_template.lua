@@ -393,7 +393,7 @@ close_lua_upvalues(open_list, inst.A)
 
 --[[CLOSURE]]
 local sub = subs[inst.Bx + 1] -- offset for 1 based index
-local nups = sub.numupvals
+local nups = sub.num_upval
 local uvlist
 
 if nups ~= 0 then

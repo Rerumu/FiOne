@@ -339,9 +339,9 @@ local function cst_flt_rdr(len, func)
 	end
 end
 
-local function stm_instructions(S)
+local function stm_inst_list(S)
 	local len = S:s_int()
-	local code = table.create(len)
+	local list = table.create(len)
 
 	for i = 1, len do
 		local ins = S:s_ins()
@@ -362,15 +362,15 @@ local function stm_instructions(S)
 			data.sBx = bit.band(bit.rshift(ins, 14), 0x3FFFF) - 131071
 		end
 
-		code[i] = data
+		list[i] = data
 	end
 
-	return code
+	return list
 end
 
-local function stm_constants(S)
+local function stm_const_list(S)
 	local len = S:s_int()
-	local consts = table.create(len)
+	local list = table.create(len)
 
 	for i = 1, len do
 		local tt = stm_byte(S)
@@ -384,48 +384,48 @@ local function stm_constants(S)
 			k = stm_lstring(S)
 		end
 
-		consts[i] = k -- offset +1 during instruction decode
+		list[i] = k -- offset +1 during instruction decode
 	end
 
-	return consts
+	return list
 end
 
-local function stm_subfuncs(S, src)
+local function stm_sub_list(S, src)
 	local len = S:s_int()
-	local sub = table.create(len)
+	local list = table.create(len)
 
 	for i = 1, len do
-		sub[i] = stm_lua_func(S, src) -- offset +1 in CLOSURE
+		list[i] = stm_lua_func(S, src) -- offset +1 in CLOSURE
 	end
 
-	return sub
+	return list
 end
 
-local function stm_lineinfo(S)
+local function stm_line_list(S)
 	local len = S:s_int()
-	local lines = table.create(len)
+	local list = table.create(len)
 
-	for i = 1, len do lines[i] = S:s_int() end
+	for i = 1, len do list[i] = S:s_int() end
 
-	return lines
+	return list
 end
 
-local function stm_locvars(S)
+local function stm_loc_list(S)
 	local len = S:s_int()
-	local locvars = table.create(len)
+	local list = table.create(len)
 
-	for i = 1, len do locvars[i] = {varname = stm_lstring(S), startpc = S:s_int(), endpc = S:s_int()} end
+	for i = 1, len do list[i] = {varname = stm_lstring(S), startpc = S:s_int(), endpc = S:s_int()} end
 
-	return locvars
+	return list
 end
 
-local function stm_upvals(S)
+local function stm_upval_list(S)
 	local len = S:s_int()
-	local upvals = table.create(len)
+	local list = table.create(len)
 
-	for i = 1, len do upvals[i] = stm_lstring(S) end
+	for i = 1, len do list[i] = stm_lstring(S) end
 
-	return upvals
+	return list
 end
 
 function stm_lua_func(S, psrc)
@@ -437,19 +437,19 @@ function stm_lua_func(S, psrc)
 	S:s_int() -- line defined
 	S:s_int() -- last line defined
 
-	proto.numupvals = stm_byte(S) -- num upvalues
-	proto.numparams = stm_byte(S) -- num params
+	proto.num_upval = stm_byte(S) -- num upvalues
+	proto.num_param = stm_byte(S) -- num params
 
 	stm_byte(S) -- vararg flag
-	proto.maxstacksize = stm_byte(S) -- max stack size
+	proto.max_stack = stm_byte(S) -- max stack size
 
-	proto.code = stm_instructions(S)
-	proto.const = stm_constants(S)
-	proto.subs = stm_subfuncs(S, src)
-	proto.lines = stm_lineinfo(S)
+	proto.code = stm_inst_list(S)
+	proto.const = stm_const_list(S)
+	proto.subs = stm_sub_list(S, src)
+	proto.lines = stm_line_list(S)
 
-	stm_locvars(S)
-	stm_upvals(S)
+	stm_loc_list(S)
+	stm_upval_list(S)
 
 	-- post process optimization
 	for _, v in ipairs(proto.code) do
@@ -910,7 +910,7 @@ local function run_lua_func(state, env, upvals)
 						if op < 32 then
 							--[[CLOSURE]]
 							local sub = subs[inst.Bx + 1] -- offset for 1 based index
-							local nups = sub.numupvals
+							local nups = sub.num_upval
 							local uvlist
 
 							if nups ~= 0 then
@@ -1033,14 +1033,14 @@ end
 function wrap_lua_func(proto, env, upval)
 	local function wrapped(...)
 		local passed = table.pack(...)
-		local memory = table.create(proto.maxstacksize)
+		local memory = table.create(proto.max_stack)
 		local vararg = {len = 0, list = {}}
 
-		table.move(passed, 1, proto.numparams, 0, memory)
+		table.move(passed, 1, proto.num_param, 0, memory)
 
-		if proto.numparams < passed.n then
-			local start = proto.numparams + 1
-			local len = passed.n - proto.numparams
+		if proto.num_param < passed.n then
+			local start = proto.num_param + 1
+			local len = passed.n - proto.num_param
 
 			vararg.len = len
 			table.move(passed, start, start + len - 1, 1, vararg.list)
