@@ -1,7 +1,12 @@
 local env = getfenv(0)
 local fio
 
-local function wrap_func(fn) return fio.wrap_lua(fio.stm_lua(string.dump(fn)), env) end
+local function wrap_func(fn)
+	local bc = string.dump(fn)
+	local state = fio.bc_to_state(bc)
+
+	return fio.wrap_state(state, env)
+end
 
 fio = require('source')
 -- fio = wrap_func(loadfile('source.lua'))() -- self running, uncomment to test

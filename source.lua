@@ -29,8 +29,8 @@ if not table.move then
 	end
 end
 
-local stm_lua_bytecode
-local wrap_lua_func
+local lua_bc_to_state
+local lua_wrap_state
 local stm_lua_func
 
 -- SETLIST config
@@ -465,7 +465,7 @@ function stm_lua_func(S, psrc)
 	return proto
 end
 
-function stm_lua_bytecode(src)
+function lua_bc_to_state(src)
 	-- func reader
 	local rdr_func
 
@@ -929,7 +929,7 @@ local function run_lua_func(state, env, upvals)
 								pc = pc + nups
 							end
 
-							memory[inst.A] = wrap_lua_func(sub, env, uvlist)
+							memory[inst.A] = lua_wrap_state(sub, env, uvlist)
 						else
 							--[[TESTSET]]
 							local A = inst.A
@@ -1030,7 +1030,7 @@ local function run_lua_func(state, env, upvals)
 	end
 end
 
-function wrap_lua_func(proto, env, upval)
+function lua_wrap_state(proto, env, upval)
 	local function wrapped(...)
 		local passed = table.pack(...)
 		local memory = table.create(proto.max_stack)
@@ -1064,4 +1064,4 @@ function wrap_lua_func(proto, env, upval)
 	return wrapped
 end
 
-return {stm_lua = stm_lua_bytecode, wrap_lua = wrap_lua_func}
+return {bc_to_state = lua_bc_to_state, wrap_state = lua_wrap_state}
