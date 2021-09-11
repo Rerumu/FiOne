@@ -367,9 +367,10 @@ table.move(vals, 1, inst.C, base, stack)
 
 if stack[base] ~= nil then
 	stack[A + 2] = stack[base]
-else
-	pc = pc + 1
+	pc = pc + code[pc].sBx
 end
+
+pc = pc + 1
 
 --[[SETLIST]]
 local A = inst.A

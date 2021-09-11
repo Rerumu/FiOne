@@ -1018,9 +1018,10 @@ local function run_lua_func(state, env, upvals)
 
 				if memory[base] ~= nil then
 					memory[A + 2] = memory[base]
-				else
-					pc = pc + 1
+					pc = pc + code[pc].sBx
 				end
+
+				pc = pc + 1
 			end
 		else
 			--[[JMP]]
