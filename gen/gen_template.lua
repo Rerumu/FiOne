@@ -251,17 +251,18 @@ if (lhs <= rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
 pc = pc + 1
 
 --[[TEST]]
-if (not memory[inst.A]) == (inst.C ~= 0) then pc = pc + 1 end
+if (not memory[inst.A]) ~= (inst.C ~= 0) then pc = pc + code[pc].sBx end
+pc = pc + 1
 
 --[[TESTSET]]
 local A = inst.A
 local B = inst.B
 
-if (not memory[B]) == (inst.C ~= 0) then
-	pc = pc + 1
-else
+if (not memory[B]) ~= (inst.C ~= 0) then
 	memory[A] = memory[B]
+	pc = pc + code[pc].sBx
 end
+pc = pc + 1
 
 --[[CALL]]
 local A = inst.A
