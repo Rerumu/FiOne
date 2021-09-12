@@ -935,11 +935,11 @@ local function run_lua_func(state, env, upvals)
 							local A = inst.A
 							local B = inst.B
 
-							if (not memory[B]) == (inst.C ~= 0) then
-								pc = pc + 1
-							else
+							if (not memory[B]) ~= (inst.C ~= 0) then
 								memory[A] = memory[B]
+								pc = pc + code[pc].sBx
 							end
+							pc = pc + 1
 						end
 					else
 						--[[UNM]]
@@ -997,7 +997,8 @@ local function run_lua_func(state, env, upvals)
 					end
 				else
 					--[[TEST]]
-					if (not memory[inst.A]) == (inst.C ~= 0) then pc = pc + 1 end
+					if (not memory[inst.A]) ~= (inst.C ~= 0) then pc = pc + code[pc].sBx end
+					pc = pc + 1
 				end
 			else
 				--[[TFORLOOP]]
@@ -1017,9 +1018,10 @@ local function run_lua_func(state, env, upvals)
 
 				if memory[base] ~= nil then
 					memory[A + 2] = memory[base]
-				else
-					pc = pc + 1
+					pc = pc + code[pc].sBx
 				end
+
+				pc = pc + 1
 			end
 		else
 			--[[JMP]]
