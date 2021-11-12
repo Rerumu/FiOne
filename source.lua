@@ -179,7 +179,11 @@ local function rd_int_basic(src, s, e, d)
 	-- 	bb[l] = bb[l] - 128
 	-- end
 
-	for i = s, e, d do num = num + string.byte(src, i, i) * 256 ^ (i - s) end
+	for i = s, e, d do
+		local mul = 256 ^ math.abs(i - s)
+
+		num = num + mul * string.byte(src, i, i)
+	end
 
 	return num
 end
