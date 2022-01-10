@@ -352,21 +352,21 @@ pc = pc + inst.sBx
 
 --[[TFORLOOP]]
 local A = inst.A
-local func = stack[A]
-local first = stack[A + 1]
-local second = stack[A + 2]
+local func = memory[A]
+local first = memory[A + 1]
+local second = memory[A + 2]
 local base = A + 3
 
-stack[base + 2] = second
-stack[base + 1] = first
-stack[base] = func
+memory[base + 2] = second
+memory[base + 1] = first
+memory[base] = func
 
 local vals = {func(first, second)}
 
-table.move(vals, 1, inst.C, base, stack)
+table.move(vals, 1, inst.C, base, memory)
 
-if stack[base] ~= nil then
-	stack[A + 2] = stack[base]
+if memory[base] ~= nil then
+	memory[A + 2] = memory[base]
 	pc = pc + code[pc].sBx
 end
 
