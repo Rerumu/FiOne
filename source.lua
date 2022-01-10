@@ -1007,16 +1007,9 @@ local function run_lua_func(state, env, upvals)
 			else
 				--[[TFORLOOP]]
 				local A = inst.A
-				local func = memory[A]
-				local first = memory[A + 1]
-				local second = memory[A + 2]
 				local base = A + 3
 
-				memory[base + 2] = second
-				memory[base + 1] = first
-				memory[base] = func
-
-				local vals = {func(first, second)}
+				local vals = {memory[A](memory[A + 1], memory[A + 2])}
 
 				table.move(vals, 1, inst.C, base, memory)
 
