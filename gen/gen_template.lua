@@ -381,7 +381,7 @@ end
 
 offset = (C - 1) * FIELDS_PER_FLUSH
 
-table.move(memory, A, A + len - 1, offset + 1, tab)
+table.move(memory, A + 1, A + len, offset + 1, tab)
 
 --[[CLOSE]]
 close_lua_upvalues(open_list, inst.A)

@@ -994,7 +994,7 @@ local function run_lua_func(state, env, upvals)
 
 						offset = (C - 1) * FIELDS_PER_FLUSH
 
-						table.move(memory, A, A + len - 1, offset + 1, tab)
+						table.move(memory, A + 1, A + len, offset + 1, tab)
 					else
 						--[[NOT]]
 						memory[inst.A] = not memory[inst.B]
