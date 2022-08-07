@@ -184,9 +184,10 @@ memory[inst.A] = not memory[inst.B]
 memory[inst.A] = #memory[inst.B]
 
 --[[CONCAT]]
-local str = memory[inst.B]
+local B = inst.B
+local str = memory[B]
 
-for i = inst.B + 1, inst.C do str = str .. memory[i] end
+for i = B + 1, inst.C do str = str .. memory[i] end
 
 memory[inst.A] = str
 
@@ -331,8 +332,8 @@ else
 end
 
 if loops then
-	memory[inst.A] = index
-	memory[inst.A + 3] = index
+	memory[A] = index
+	memory[A + 3] = index
 	pc = pc + inst.sBx
 end
 
