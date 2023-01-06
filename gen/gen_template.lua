@@ -56,7 +56,7 @@ end
 memory[inst.A][index] = value
 
 --[[NEWTABLE]]
-memory[inst.A] = {}
+memory[inst.A] = table.create(inst.const) -- inst.const contains array size
 
 --[[SELF]]
 local A = inst.A
