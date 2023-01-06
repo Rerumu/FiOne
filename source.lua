@@ -366,6 +366,15 @@ local function stm_inst_list(S)
 			data.sBx = bit.band(bit.rshift(ins, 14), 0x3FFFF) - 131071
 		end
 
+		if op == 10 then -- decode NEWTABLE array size
+			local e = bit.band(bit.rshift(data.B, 3), 31)
+			if (e == 0) then
+				data.const = data.B
+			else
+				data.const = bit.lshift(bit.band(data.B, 7) + 8, e - 1) -- store as constant value
+			end
+		end
+
 		list[i] = data
 	end
 
@@ -730,7 +739,7 @@ local function run_lua_func(state, env, upvals)
 						end
 					elseif op > 16 then
 						--[[NEWTABLE]]
-						memory[inst.A] = {}
+						memory[inst.A] = table.create(inst.const) -- inst.const contains array size
 					else
 						--[[DIV]]
 						local lhs, rhs
