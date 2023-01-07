@@ -359,20 +359,20 @@ local function stm_inst_list(S)
 			data.C = bit.band(bit.rshift(ins, 14), 0x1FF)
 			data.is_KB = mode.b == 'OpArgK' and data.B > 0xFF -- post process optimization
 			data.is_KC = mode.c == 'OpArgK' and data.C > 0xFF
+
+			if op == 10 then -- decode NEWTABLE array size, store it as constant value
+				local e = bit.band(bit.rshift(data.B, 3), 31)
+				if e == 0 then
+					data.const = data.B
+				else
+					data.const = bit.lshift(bit.band(data.B, 7) + 8, e - 1)
+				end
+			end
 		elseif args == 'ABx' then
 			data.Bx = bit.band(bit.rshift(ins, 14), 0x3FFFF)
 			data.is_K = mode.b == 'OpArgK'
 		elseif args == 'AsBx' then
 			data.sBx = bit.band(bit.rshift(ins, 14), 0x3FFFF) - 131071
-		end
-
-		if op == 10 then -- decode NEWTABLE array size
-			local e = bit.band(bit.rshift(data.B, 3), 31)
-			if (e == 0) then
-				data.const = data.B
-			else
-				data.const = bit.lshift(bit.band(data.B, 7) + 8, e - 1) -- store as constant value
-			end
 		end
 
 		list[i] = data
