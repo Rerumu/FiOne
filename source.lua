@@ -928,7 +928,7 @@ local function run_lua_func(state, env, upvals)
 							local uvlist
 
 							if nups ~= 0 then
-								uvlist = {}
+								uvlist = table.create(nups - 1)
 
 								for i = 1, nups do
 									local pseudo = code[pc + i - 1]
