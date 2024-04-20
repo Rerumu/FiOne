@@ -393,7 +393,7 @@ local nups = sub.num_upval
 local uvlist
 
 if nups ~= 0 then
-	uvlist = {}
+	uvlist = table.create(nups - 1)
 
 	for i = 1, nups do
 		local pseudo = code[pc + i - 1]
