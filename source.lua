@@ -1073,4 +1073,10 @@ function lua_wrap_state(proto, env, upval)
 	return wrapped
 end
 
-return {bc_to_state = lua_bc_to_state, wrap_state = lua_wrap_state}
+return {
+	bc_to_state = lua_bc_to_state,
+	wrap_state = lua_wrap_state,,
+	opcode_rm = OPCODE_RM,
+	opcode_t = OPCODE_T,
+	opcode_m = OPCODE_M,
+}
