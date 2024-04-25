@@ -184,10 +184,14 @@ memory[inst.A] = not memory[inst.B]
 memory[inst.A] = #memory[inst.B]
 
 --[[CONCAT]]
-local B = inst.B
-local str = memory[B]
+local B, C = inst.B, inst.C
+local success, str = pcall(table.concat, memory, "", B, C)
 
-for i = B + 1, inst.C do str = str .. memory[i] end
+if not success then
+	str = memory[B]
+
+	for i = B + 1, C do str = str .. memory[i] end
+end
 
 memory[inst.A] = str
 
