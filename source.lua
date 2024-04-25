@@ -1080,7 +1080,7 @@ end
 return {
 	bc_to_state = lua_bc_to_state,
 	wrap_state = lua_wrap_state,,
-	opcode_rm = OPCODE_RM,
-	opcode_t = OPCODE_T,
-	opcode_m = OPCODE_M,
+	OPCODE_RM = OPCODE_RM,
+	OPCODE_T = OPCODE_T,
+	OPCODE_M = OPCODE_M,
 }
