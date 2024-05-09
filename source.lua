@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ]] --
 local bit = bit or bit32 or require('bit')
 
-if not table.create then function table.create(_) return {} end end
+if not table.create then if table.new then table.create = table.new else function table.create(_) return {} end end end
 
 if not table.unpack then table.unpack = unpack end
 
