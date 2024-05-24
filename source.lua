@@ -14,18 +14,31 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
-]] --
-local bit = bit or bit32 or require('bit')
+]]
+--
+local bit = bit or bit32 or require("bit")
 
-if not table.create then function table.create(_) return {} end end
+if not table.create then
+	function table.create(_)
+		return {}
+	end
+end
 
-if not table.unpack then table.unpack = unpack end
+if not table.unpack then
+	table.unpack = unpack
+end
 
-if not table.pack then function table.pack(...) return {n = select('#', ...), ...} end end
+if not table.pack then
+	function table.pack(...)
+		return { n = select("#", ...), ... }
+	end
+end
 
 if not table.move then
 	function table.move(src, first, last, offset, dst)
-		for i = 0, last - first do dst[offset + i] = src[first + i] end
+		for i = 0, last - first do
+			dst[offset + i] = src[first + i]
+		end
 	end
 end
 
@@ -85,85 +98,85 @@ local OPCODE_RM = {
 
 -- opcode types for getting values
 local OPCODE_T = {
-	[0] = 'ABC',
-	'ABx',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABx',
-	'ABC',
-	'ABx',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'AsBx',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABC',
-	'AsBx',
-	'AsBx',
-	'ABC',
-	'ABC',
-	'ABC',
-	'ABx',
-	'ABC',
+	[0] = "ABC",
+	"ABx",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABx",
+	"ABC",
+	"ABx",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"AsBx",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABC",
+	"AsBx",
+	"AsBx",
+	"ABC",
+	"ABC",
+	"ABC",
+	"ABx",
+	"ABC",
 }
 
 local OPCODE_M = {
-	[0] = {b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgK', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgU'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgN'},
-	{b = 'OpArgK', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgN'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgU', c = 'OpArgU'},
-	{b = 'OpArgR', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgR'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgK', c = 'OpArgK'},
-	{b = 'OpArgR', c = 'OpArgU'},
-	{b = 'OpArgR', c = 'OpArgU'},
-	{b = 'OpArgU', c = 'OpArgU'},
-	{b = 'OpArgU', c = 'OpArgU'},
-	{b = 'OpArgU', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgR', c = 'OpArgN'},
-	{b = 'OpArgN', c = 'OpArgU'},
-	{b = 'OpArgU', c = 'OpArgU'},
-	{b = 'OpArgN', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgN'},
-	{b = 'OpArgU', c = 'OpArgN'},
+	[0] = { b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgK", c = "OpArgN" },
+	{ b = "OpArgU", c = "OpArgU" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgU", c = "OpArgN" },
+	{ b = "OpArgK", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgN" },
+	{ b = "OpArgU", c = "OpArgN" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgU", c = "OpArgU" },
+	{ b = "OpArgR", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgR" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgK", c = "OpArgK" },
+	{ b = "OpArgR", c = "OpArgU" },
+	{ b = "OpArgR", c = "OpArgU" },
+	{ b = "OpArgU", c = "OpArgU" },
+	{ b = "OpArgU", c = "OpArgU" },
+	{ b = "OpArgU", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgR", c = "OpArgN" },
+	{ b = "OpArgN", c = "OpArgU" },
+	{ b = "OpArgU", c = "OpArgU" },
+	{ b = "OpArgN", c = "OpArgN" },
+	{ b = "OpArgU", c = "OpArgN" },
+	{ b = "OpArgU", c = "OpArgN" },
 }
 
 -- int rd_int_basic(string src, int s, int e, int d)
@@ -246,18 +259,24 @@ end
 -- @src - Source binary string
 -- @s - Start index of a little endian integer
 -- @e - End index of the integer
-local function rd_int_le(src, s, e) return rd_int_basic(src, s, e - 1, 1) end
+local function rd_int_le(src, s, e)
+	return rd_int_basic(src, s, e - 1, 1)
+end
 
 -- int rd_int_be(string src, int s, int e)
 -- @src - Source binary string
 -- @s - Start index of a big endian integer
 -- @e - End index of the integer
-local function rd_int_be(src, s, e) return rd_int_basic(src, e - 1, s, -1) end
+local function rd_int_be(src, s, e)
+	return rd_int_basic(src, e - 1, s, -1)
+end
 
 -- float rd_flt_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian float
-local function rd_flt_le(src, s) return rd_flt_basic(string.byte(src, s, s + 3)) end
+local function rd_flt_le(src, s)
+	return rd_flt_basic(string.byte(src, s, s + 3))
+end
 
 -- float rd_flt_be(string src, int s)
 -- @src - Source binary string
@@ -270,7 +289,9 @@ end
 -- double rd_dbl_le(string src, int s)
 -- @src - Source binary string
 -- @s - Start index of little endian double
-local function rd_dbl_le(src, s) return rd_dbl_basic(string.byte(src, s, s + 7)) end
+local function rd_dbl_le(src, s)
+	return rd_dbl_basic(string.byte(src, s, s + 7))
+end
 
 -- double rd_dbl_be(string src, int s)
 -- @src - Source binary string
@@ -282,8 +303,8 @@ end
 
 -- to avoid nested ifs in deserializing
 local float_types = {
-	[4] = {little = rd_flt_le, big = rd_flt_be},
-	[8] = {little = rd_dbl_le, big = rd_dbl_be},
+	[4] = { little = rd_flt_le, big = rd_flt_be },
+	[8] = { little = rd_dbl_le, big = rd_dbl_be },
 }
 
 -- byte stm_byte(Stream S)
@@ -313,7 +334,9 @@ local function stm_lstring(S)
 	local len = S:s_szt()
 	local str
 
-	if len ~= 0 then str = string.sub(stm_string(S, len), 1, -2) end
+	if len ~= 0 then
+		str = string.sub(stm_string(S, len), 1, -2)
+	end
 
 	return str
 end
@@ -352,13 +375,13 @@ local function stm_inst_list(S)
 		local op = bit.band(ins, 0x3F)
 		local args = OPCODE_T[op]
 		local mode = OPCODE_M[op]
-		local data = {value = ins, op = OPCODE_RM[op], A = bit.band(bit.rshift(ins, 6), 0xFF)}
+		local data = { value = ins, op = OPCODE_RM[op], A = bit.band(bit.rshift(ins, 6), 0xFF) }
 
-		if args == 'ABC' then
+		if args == "ABC" then
 			data.B = bit.band(bit.rshift(ins, 23), 0x1FF)
 			data.C = bit.band(bit.rshift(ins, 14), 0x1FF)
-			data.is_KB = mode.b == 'OpArgK' and data.B > 0xFF -- post process optimization
-			data.is_KC = mode.c == 'OpArgK' and data.C > 0xFF
+			data.is_KB = mode.b == "OpArgK" and data.B > 0xFF -- post process optimization
+			data.is_KC = mode.c == "OpArgK" and data.C > 0xFF
 
 			if op == 10 then -- decode NEWTABLE array size, store it as constant value
 				local e = bit.band(bit.rshift(data.B, 3), 31)
@@ -368,10 +391,10 @@ local function stm_inst_list(S)
 					data.const = bit.lshift(bit.band(data.B, 7) + 8, e - 1)
 				end
 			end
-		elseif args == 'ABx' then
+		elseif args == "ABx" then
 			data.Bx = bit.band(bit.rshift(ins, 14), 0x3FFFF)
-			data.is_K = mode.b == 'OpArgK'
-		elseif args == 'AsBx' then
+			data.is_K = mode.b == "OpArgK"
+		elseif args == "AsBx" then
 			data.sBx = bit.band(bit.rshift(ins, 14), 0x3FFFF) - 131071
 		end
 
@@ -418,7 +441,9 @@ local function stm_line_list(S)
 	local len = S:s_int()
 	local list = table.create(len)
 
-	for i = 1, len do list[i] = S:s_int() end
+	for i = 1, len do
+		list[i] = S:s_int()
+	end
 
 	return list
 end
@@ -427,7 +452,9 @@ local function stm_loc_list(S)
 	local len = S:s_int()
 	local list = table.create(len)
 
-	for i = 1, len do list[i] = {varname = stm_lstring(S), startpc = S:s_int(), endpc = S:s_int()} end
+	for i = 1, len do
+		list[i] = { varname = stm_lstring(S), startpc = S:s_int(), endpc = S:s_int() }
+	end
 
 	return list
 end
@@ -436,7 +463,9 @@ local function stm_upval_list(S)
 	local len = S:s_int()
 	local list = table.create(len)
 
-	for i = 1, len do list[i] = stm_lstring(S) end
+	for i = 1, len do
+		list[i] = stm_lstring(S)
+	end
 
 	return list
 end
@@ -469,9 +498,13 @@ function stm_lua_func(S, psrc)
 		if v.is_K then
 			v.const = proto.const[v.Bx + 1] -- offset for 1 based index
 		else
-			if v.is_KB then v.const_B = proto.const[v.B - 0xFF] end
+			if v.is_KB then
+				v.const_B = proto.const[v.B - 0xFF]
+			end
 
-			if v.is_KC then v.const_C = proto.const[v.C - 0xFF] end
+			if v.is_KC then
+				v.const_C = proto.const[v.C - 0xFF]
+			end
 		end
 	end
 
@@ -497,9 +530,9 @@ function lua_bc_to_state(src)
 		source = src,
 	}
 
-	assert(stm_string(stream, 4) == '\27Lua', 'invalid Lua signature')
-	assert(stm_byte(stream) == 0x51, 'invalid Lua version')
-	assert(stm_byte(stream) == 0, 'invalid Lua format')
+	assert(stm_string(stream, 4) == "\27Lua", "invalid Lua signature")
+	assert(stm_byte(stream) == 0x51, "invalid Lua version")
+	assert(stm_byte(stream) == 0, "invalid Lua format")
 
 	little = stm_byte(stream) ~= 0
 	size_int = stm_byte(stream)
@@ -516,12 +549,12 @@ function lua_bc_to_state(src)
 	if flag_int then
 		stream.s_num = cst_int_rdr(size_num, rdr_func)
 	elseif float_types[size_num] then
-		stream.s_num = cst_flt_rdr(size_num, float_types[size_num][little and 'little' or 'big'])
+		stream.s_num = cst_flt_rdr(size_num, float_types[size_num][little and "little" or "big"])
 	else
-		error('unsupported float size')
+		error("unsupported float size")
 	end
 
-	return stm_lua_func(stream, '@virtual')
+	return stm_lua_func(stream, "@virtual")
 end
 
 local function close_lua_upvalues(list, index)
@@ -529,7 +562,7 @@ local function close_lua_upvalues(list, index)
 		if uv.index >= index then
 			uv.value = uv.store[uv.index] -- store value
 			uv.store = uv
-			uv.index = 'value' -- self reference
+			uv.index = "value" -- self reference
 			list[i] = nil
 		end
 	end
@@ -539,7 +572,7 @@ local function open_lua_upvalue(list, index, memory)
 	local prev = list[index]
 
 	if not prev then
-		prev = {index = index, store = memory}
+		prev = { index = index, store = memory }
 		list[index] = prev
 	end
 
@@ -550,7 +583,7 @@ local function on_lua_error(failed, err)
 	local src = failed.source
 	local line = failed.lines[failed.pc - 1]
 
-	error(string.format('%s:%i: %s', src, line, err), 0)
+	error(string.format("%s:%i: %s", src, line, err), 0)
 end
 
 local function run_lua_func(state, env, upvals)
@@ -573,7 +606,9 @@ local function run_lua_func(state, env, upvals)
 				if op < 3 then
 					if op < 1 then
 						--[[LOADNIL]]
-						for i = inst.A, inst.B do memory[i] = nil end
+						for i = inst.A, inst.B do
+							memory[i] = nil
+						end
 					elseif op > 1 then
 						--[[GETUPVAL]]
 						local uv = upvals[inst.B]
@@ -812,7 +847,9 @@ local function run_lua_func(state, env, upvals)
 							if not success then
 								str = memory[B]
 
-								for i = B + 1, C do str = str .. memory[i] end
+								for i = B + 1, C do
+									str = str .. memory[i]
+								end
 							end
 
 							memory[inst.A] = str
@@ -856,7 +893,9 @@ local function run_lua_func(state, env, upvals)
 								rhs = memory[inst.C]
 							end
 
-							if (lhs == rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+							if (lhs == rhs) == (inst.A ~= 0) then
+								pc = pc + code[pc].sBx
+							end
 
 							pc = pc + 1
 						end
@@ -876,7 +915,9 @@ local function run_lua_func(state, env, upvals)
 							rhs = memory[inst.C]
 						end
 
-						if (lhs < rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+						if (lhs < rhs) == (inst.A ~= 0) then
+							pc = pc + code[pc].sBx
+						end
 
 						pc = pc + 1
 					else
@@ -901,7 +942,9 @@ local function run_lua_func(state, env, upvals)
 					--[[LOADBOOL]]
 					memory[inst.A] = inst.B ~= 0
 
-					if inst.C ~= 0 then pc = pc + 1 end
+					if inst.C ~= 0 then
+						pc = pc + 1
+					end
 				end
 			elseif op > 28 then
 				if op < 33 then
@@ -921,7 +964,9 @@ local function run_lua_func(state, env, upvals)
 							rhs = memory[inst.C]
 						end
 
-						if (lhs <= rhs) == (inst.A ~= 0) then pc = pc + code[pc].sBx end
+						if (lhs <= rhs) == (inst.A ~= 0) then
+							pc = pc + code[pc].sBx
+						end
 
 						pc = pc + 1
 					elseif op > 30 then
@@ -981,9 +1026,9 @@ local function run_lua_func(state, env, upvals)
 							local A = inst.A
 							local init, limit, step
 
-							init = assert(tonumber(memory[A]), '`for` initial value must be a number')
-							limit = assert(tonumber(memory[A + 1]), '`for` limit must be a number')
-							step = assert(tonumber(memory[A + 2]), '`for` step must be a number')
+							init = assert(tonumber(memory[A]), "`for` initial value must be a number")
+							limit = assert(tonumber(memory[A + 1]), "`for` limit must be a number")
+							step = assert(tonumber(memory[A + 2]), "`for` step must be a number")
 
 							memory[A] = init - step
 							memory[A + 1] = limit
@@ -999,7 +1044,9 @@ local function run_lua_func(state, env, upvals)
 						local tab = memory[A]
 						local offset
 
-						if len == 0 then len = top_index - A end
+						if len == 0 then
+							len = top_index - A
+						end
 
 						if C == 0 then
 							C = inst[pc].value
@@ -1015,7 +1062,9 @@ local function run_lua_func(state, env, upvals)
 					end
 				else
 					--[[TEST]]
-					if (not memory[inst.A]) ~= (inst.C ~= 0) then pc = pc + code[pc].sBx end
+					if (not memory[inst.A]) ~= (inst.C ~= 0) then
+						pc = pc + code[pc].sBx
+					end
 					pc = pc + 1
 				end
 			else
@@ -1023,7 +1072,7 @@ local function run_lua_func(state, env, upvals)
 				local A = inst.A
 				local base = A + 3
 
-				local vals = {memory[A](memory[A + 1], memory[A + 2])}
+				local vals = { memory[A](memory[A + 1], memory[A + 2]) }
 
 				table.move(vals, 1, inst.C, base, memory)
 
@@ -1047,7 +1096,7 @@ function lua_wrap_state(proto, env, upval)
 	local function wrapped(...)
 		local passed = table.pack(...)
 		local memory = table.create(proto.max_stack)
-		local vararg = {len = 0, list = {}}
+		local vararg = { len = 0, list = {} }
 
 		table.move(passed, 1, proto.num_param, 0, memory)
 
@@ -1059,14 +1108,14 @@ function lua_wrap_state(proto, env, upval)
 			table.move(passed, start, start + len - 1, 1, vararg.list)
 		end
 
-		local state = {vararg = vararg, memory = memory, code = proto.code, subs = proto.subs, pc = 1}
+		local state = { vararg = vararg, memory = memory, code = proto.code, subs = proto.subs, pc = 1 }
 
 		local result = table.pack(pcall(run_lua_func, state, env, upval))
 
 		if result[1] then
 			return table.unpack(result, 2, result.n)
 		else
-			local failed = {pc = state.pc, source = proto.source, lines = proto.lines}
+			local failed = { pc = state.pc, source = proto.source, lines = proto.lines }
 
 			on_lua_error(failed, result[2])
 
