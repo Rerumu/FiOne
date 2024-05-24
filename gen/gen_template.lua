@@ -403,7 +403,7 @@ if nups ~= 0 then
 		local pseudo = code[pc + i - 1]
 
 		if pseudo.op == OPCODE_RM[0] then -- @MOVE
-			uvlist[i - 1] = open_lua_upvalue(openupvs, pseudo.B, memory)
+			uvlist[i - 1] = open_lua_upvalue(open_list, pseudo.B, memory)
 		elseif pseudo.op == OPCODE_RM[4] then -- @GETUPVAL
 			uvlist[i - 1] = upvals[pseudo.B]
 		end
@@ -412,7 +412,7 @@ if nups ~= 0 then
 	pc = pc + nups
 end
 
-memory[inst.A] = wrap_lua_func(sub, env, uvlist)
+memory[inst.A] = lua_wrap_state(sub, env, uvlist)
 
 --[[VARARG]]
 local A = inst.A
