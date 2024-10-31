@@ -329,7 +329,7 @@ local index = memory[A] + step
 local limit = memory[A + 1]
 local loops
 
-if step == math.abs(step) then
+if step >= 0 then
 	loops = index <= limit
 else
 	loops = index >= limit
